@@ -1,0 +1,131 @@
+// const HtmlWebpackPlugin = require('html-webpack-plugin');
+/* eslint-disable */
+var webpack = require('webpack');
+const path = require('path');
+var LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+
+module.exports = {
+  devtool:'source-map',
+  module: {
+    rules: [
+      {
+        test:    /\.(js|jsx)?/,
+        exclude: /node_modules/,
+        use:     {
+          loader: 'babel-loader',
+        },
+        // use: ["babel-loader", "eslint-loader"]
+      },
+      {
+        test: /\.scss$/,
+        use:  [{
+          loader: 'style-loader', // 将 JS 字符串生成为 style 节点
+        }, {
+          loader: 'css-loader', // 将 CSS 转化成 CommonJS 模块
+        }, {
+          loader: 'sass-loader', // 将 Sass 编译成 CSS
+        }],
+      },
+      { // 使用css配置
+        test:   /\.css$/,
+        loader: 'style-loader!css-loader',
+      },
+      {
+        // 使用less配置
+        test:   /\.less$/,
+        loader: 'style-loader!css-loader',
+      },
+      {
+        test: /\.(png|jpg|gif)$/i,
+        use:  [
+          {
+            loader:  'url-loader',
+            options: {
+              limit: 8192,
+              // mimetype:'image/tif'
+            },
+          },
+        ],
+      },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use:[
+          {
+            loader: 'babel-loader',
+            // options: {
+            //   plugins: ['lodash'],
+            //   presets: [['env', { 'modules': false, 'targets': { 'node': 4 } }]]
+            // }
+          }
+        ]
+      }
+    ],
+    // rules: [
+    //     {
+    //       enforce: "pre",
+    //       test: /\.js$/,
+    //       exclude: /node_modules/,
+    //       loader: "eslint-loader",
+    //       options: { // 这里的配置项参数将会被传递到 eslint 的 CLIEngine
+    //         formatter: require('eslint-friendly-formatter') // 指定错误报告的格式规范
+    //     }
+    //     },
+    //     {
+    //       test: /\.js$/,
+    //       exclude: /node_modules/,
+    //       loader: "babel-loader"
+    //     }
+    //   ]
+  },
+
+  cache:  true,
+  entry:  [
+    // "core-js/modules/es6.promise",
+    // "core-js/modules/es6.array.iterator",
+    path.resolve(__dirname, "src/index.js"),
+  ],
+  output: {
+    path:     path.resolve(__dirname, 'build'),
+    filename: 'banble.js',
+  },
+  resolve: {
+    extensions: [".ts", ".tsx", ".js", "jsx"],
+  },
+  devServer: {
+    // contentBase: './dst',//默认webpack-dev-server会为根文件夹提供本地服务器，如果想为另外一个目录下的文件提供本地服务器，应该在这里设置其所在目录（本例设置到"build"目录）
+    historyApiFallback: true, // 在开发单页应用时非常有用，它依赖于HTML5 history API，如果设置为true，所有的跳转将指向index.html
+    inline:             true, // 设置为true，当源文件改变时会自动刷新页面
+    port:               8080, // 设置默认监听端口，如果省略，默认为"8080"
+  },
+
+  optimization: {
+    minimizer: [
+      new TerserPlugin({
+        cache: true,
+        parallel: true,
+        sourceMap: true, // Must be set to true if using source-maps in production
+        terserOptions: {
+          // https://github.com/webpack-contrib/terser-webpack-plugin#terseroptions
+        }
+      }),
+    ],
+  },
+  plugins: [
+    new LodashModuleReplacementPlugin,
+  ]
+  // plugins: [
+  //   new HtmlWebpackPlugin({
+  //     title: 'reactTest',
+  //     template: './src/index.html', //指定要打包的html路径和文件名
+  //     //filename:'./dst/index.html' ,//指定输出路径和文件名
+  //     hash: true,//给生成的 js 文件一个独特的 hash 值 <script type=text/javascript src=bundle.js?22b9692e22e7be37b57e></script>
+  //     showErrors:true,//webpack 编译出现错误
+  //     minify:{//对 html 文件进行压缩，minify 的属性值是一个压缩选项或者 false 。默认值为false, 不对生成的 html 文件进行压缩
+  //              removeComments:true, // 去除注释
+  //              collapseWhitespace: true //是否去除空格
+  //          }
+  //   })
+  // ]
+}
